@@ -1,0 +1,30 @@
+@import url('https://use.typekit.net/rmu5qvo.css');
+
+$link-color: $blue-000;
+
+* {
+  font-family: europa, sans-serif;
+}
+
+code {
+  font-family: monospace, serif !important;
+}
+
+code span {
+  font-family: 'SFMono-Regular', menlo, consolas, monospace;
+}
+
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  background: transparent;
+}
