@@ -45,50 +45,6 @@ train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=Tr
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=1000)
 ```
 
-    Downloading http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
-    Downloading http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz to ./datafiles/MNIST/raw/train-images-idx3-ubyte.gz
-
-
-    100.0%
-
-
-    Extracting ./datafiles/MNIST/raw/train-images-idx3-ubyte.gz to ./datafiles/MNIST/raw
-
-
-    100.0%
-
-    
-    Downloading http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
-    Downloading http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz to ./datafiles/MNIST/raw/train-labels-idx1-ubyte.gz
-    Extracting ./datafiles/MNIST/raw/train-labels-idx1-ubyte.gz to ./datafiles/MNIST/raw
-    
-    Downloading http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz
-
-
-    
-    2.0%
-
-    Downloading http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz to ./datafiles/MNIST/raw/t10k-images-idx3-ubyte.gz
-
-
-    100.0%
-
-
-    Extracting ./datafiles/MNIST/raw/t10k-images-idx3-ubyte.gz to ./datafiles/MNIST/raw
-    
-    Downloading http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz
-
-
-    100.0%
-
-    Downloading http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz to ./datafiles/MNIST/raw/t10k-labels-idx1-ubyte.gz
-    Extracting ./datafiles/MNIST/raw/t10k-labels-idx1-ubyte.gz to ./datafiles/MNIST/raw
-    
-
-
-    
-
-
 
 ```python
 # TODO: Run this cell to visualize 20 examples from the test dataset
@@ -249,16 +205,24 @@ def train(model, train_loader, loss_fn, optimizer, epoch=-1):
     model.train()  # Set model in training mode
     for i, (inputs, targets) in enumerate(train_loader):  # 1. Fetch next batch of data
         # TODO: Fill in the rest of the training loop
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = loss_fn(outputs, targets)
+        loss.backward()
+        optimizer.step()
+
         # 2. Zero parameter gradients
-        outputs = None  # 3. Compute model outputs
-        loss = None  # 4. Compute loss between outputs and targets
-        loss.backward()  # 5. Backpropagation for parameter gradients
+        #outputs = None  # 3. Compute model outputs
+        #loss =  # 4. Compute loss between outputs and targets
+        #loss.backward()  # 5. Backpropagation for parameter gradients
         # 6. Gradient descent step
         #####
 
         # Track some values to compute statistics
         total_loss += loss.item()
-        preds = torch.argmax(outputs, dim=-1)  # Take the class with the highest output as the prediction
+        preds = torch.argmax(
+            outputs, dim=-1
+        )  # Take the class with the highest output as the prediction
         all_predictions.extend(preds.tolist())
         all_targets.extend(targets.tolist())
 
@@ -267,12 +231,14 @@ def train(model, train_loader, loss_fn, optimizer, epoch=-1):
             running_loss = total_loss / (i + 1)
             print(f"Epoch {epoch + 1}, batch {i + 1}: loss = {running_loss:.2f}")
 
-    # TODO: Compute the overall accuracy        
+    # TODO: Compute the overall accuracy
     acc = None
     #####
 
     # Print average loss and accuracy
-    print(f"Epoch {epoch + 1} done. Average train loss = {total_loss / len(train_loader):.2f}, average train accuracy = {acc * 100:.3f}%")
+    print(
+        f"Epoch {epoch + 1} done. Average train loss = {total_loss / len(train_loader):.2f}, average train accuracy = {acc * 100:.3f}%"
+    )
 ```
 
 
@@ -313,7 +279,7 @@ def test(model, test_loader, loss_fn, epoch=-1):
     #####
 
     # Print average loss and accuracy
-    print(f"Epoch {epoch + 1} done. Average test loss = {total_loss / len(test_loader):.2f}, average test accuracy = {acc * 100:.3f}%")
+  #  print(f"Epoch {epoch + 1} done. Average test loss = {total_loss / len(test_loader):.2f}, average test accuracy = {acc * 100:.3f}%")
 ```
 
 # 4. Train the model for 5 epochs
@@ -322,31 +288,74 @@ def test(model, test_loader, loss_fn, epoch=-1):
 ```python
 # TODO: Copy the setup for the model, optimizer, and loss function from Section 2 to here
 # Then, run this cell to train the model for 5 epochs
-model = None
-
+model = MultiLayerPerceptron()
+optimizer = optim.Adam(model.parameters(), lr=1e-2)
+loss_fn = nn.CrossEntropyLoss()
 #####
 
 for epoch in range(5):
     # TODO: Fill in the rest of the arguments to the train and test functions
-    train(model, ..., epoch=epoch)
-    test(model, ..., epoch=epoch)
+    train(
+        model,
+        loss_fn=loss_fn,
+        optimizer=optimizer,
+        train_loader=train_loader,
+        epoch=epoch,
+    )
+    test(
+        model,
+        loss_fn=loss_fn,
+        epoch=epoch,
+    )
     #####
 ```
+
+    Epoch 1, batch 1: loss = 2.32
+    Epoch 1, batch 101: loss = 0.59
+    Epoch 1, batch 201: loss = 0.44
+    Epoch 1, batch 301: loss = 0.38
+    Epoch 1, batch 401: loss = 0.35
+    Epoch 1, batch 501: loss = 0.32
+    Epoch 1, batch 601: loss = 0.31
+    Epoch 1, batch 701: loss = 0.30
+    Epoch 1, batch 801: loss = 0.29
+    Epoch 1, batch 901: loss = 0.28
+
 
 
     ---------------------------------------------------------------------------
 
     TypeError                                 Traceback (most recent call last)
 
-    /Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb Cell 15 in <cell line: 7>()
-          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=4'>5</a> #####
-          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=6'>7</a> for epoch in range(5):
-          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=7'>8</a>     # TODO: Fill in the rest of the arguments to the train and test functions
-    ----> <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=8'>9</a>     train(model, ..., epoch=epoch)
-         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=9'>10</a>     test(model, ..., epoch=epoch)
+    /Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb Cell 15 in <cell line: 8>()
+          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=5'>6</a> #####
+          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=7'>8</a> for epoch in range(5):
+          <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=8'>9</a>     # TODO: Fill in the rest of the arguments to the train and test functions
+    ---> <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=9'>10</a>     train(
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=10'>11</a>         model,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=11'>12</a>         loss_fn=loss_fn,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=12'>13</a>         optimizer=optimizer,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=13'>14</a>         train_loader=train_loader,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=14'>15</a>         epoch=epoch,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=15'>16</a>     )
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=16'>17</a>     test(
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=17'>18</a>         model,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=18'>19</a>         loss_fn=loss_fn,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=19'>20</a>         epoch=epoch,
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=20'>21</a>     )
 
 
-    TypeError: train() missing 2 required positional arguments: 'loss_fn' and 'optimizer'
+    /Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb Cell 15 in train(model, train_loader, loss_fn, optimizer, epoch)
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=44'>45</a> acc = None
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=45'>46</a> #####
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=46'>47</a> 
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=47'>48</a> # Print average loss and accuracy
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=48'>49</a> print(
+    ---> <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=49'>50</a>     f"Epoch {epoch + 1} done. Average train loss = {total_loss / len(train_loader):.2f}, average train accuracy = {acc * 100:.3f}%"
+         <a href='vscode-notebook-cell:/Users/sammyrobens-paradise/projects/computational-neuroscience/tutorials/mlp_tutorial.ipynb#X20sZmlsZQ%3D%3D?line=50'>51</a> )
+
+
+    TypeError: unsupported operand type(s) for *: 'NoneType' and 'int'
 
 
 # 5. Visually compare the model predictions
