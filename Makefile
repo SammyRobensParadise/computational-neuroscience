@@ -14,3 +14,4 @@ MYDIR = .
 
 markdown:
 	jupyter nbconvert ./tutorials/regression_tutorial.ipynb --to markdown --output regression-tutorial.md
+	jupyter nbconvert ./tutorials/mlp_tutorial.ipynb --to markdown --output mlp-tutorial.md

@@ -2,4 +2,4 @@
 
 Computational Neuroscience (SYDE 556)
 
-- [Tutorials]
+- [Tutorials](./tutorials/README.md)
