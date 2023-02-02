@@ -30,7 +30,7 @@ Create a convolution layer with a 3x3 kernel that transforms the 3-channel input
 x = torch.randn(4, 3, 16, 16)
 expected_size = torch.Size((4, 16, 16, 16))
 # TODO: Create a convolution layer with the right arguments
-conv = None
+conv = nn.Conv2d(3, 16, kernel_size=(3, 3), padding="same")
 #####
 y = conv(x)
 assert y.shape == expected_size, f"Expected size {expected_size}, got size {y.shape}"
@@ -47,11 +47,18 @@ Answer:
 ```python
 x = torch.randn(4, 16, 16, 16)
 # TODO: Create a convolution layer with the right arguments
-conv1 = None
+conv1 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=(5, 5), padding="valid")
 #####
 y = conv1(x)
 y.shape
 ```
+
+
+
+
+    torch.Size([4, 16, 12, 12])
+
+
 
 ## 3. Stride
 
@@ -64,7 +71,7 @@ Answer:
 x = torch.randn(4, 3, 64, 64)
 expected_size = torch.Size((4, 3, 32, 32))
 # TODO: Create the convolution layer.
-conv = None
+conv = nn.Conv2d(3,3,kernel_size=(3,3),stride=(2,2),padding=(1,1))
 #####
 y = conv(x)
 assert y.shape == expected_size, f"Expected size {expected_size}, got size {y.shape}"
@@ -79,7 +86,9 @@ Using combinations of what you used above, create a convolution layer with a 3x3
 x = torch.randn(4, 3, 32, 32)
 expected_size = torch.Size((4, 16, 16, 16))
 # TODO: Create the convlution layer.
-conv = None
+conv = nn.Conv2d(
+    in_channels=3, out_channels=16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)
+)
 #####
 y = conv(x)
 assert y.shape == expected_size, f"Expected size {expected_size}, got size {y.shape}"
