@@ -71,6 +71,8 @@ We will train a LSTM neural network to approximate these dynamics. To do this we
 
 
 ```python
+import torch
+
 def get_random_trajectory():
     """
     :return: a van der Pol trajectory from a random initial state
@@ -116,18 +118,20 @@ Now we will make an LSTM network using a torch.nn.LSTM layer for dynamics and a 
 
 
 ```python
-import torch
 import torch.nn as nn
 
-class LSTMNetwork(nn.Module):
 
+class LSTMNetwork(nn.Module):
     def __init__(self, input_dim, hidden_dim, target_dim):
         super(LSTMNetwork, self).__init__()
-        #TODO: complete this method 
+        # TODO: complete this method
+        self.lstm = nn.LSTM(input_dim, hidden_dim)
+        self.output = nn.Linear(hidden_dim, target_dim)
 
     def forward(self, input):
-        #TODO: complete this method 
-
+        # TODO: complete this method
+        x, hidden = self.lstm(input)
+        return self.output(x)
 ```
 
 Now let's make one of these networks and train it to be a van der Pol oscillator. 
@@ -137,8 +141,10 @@ Now let's make one of these networks and train it to be a van der Pol oscillator
 import torch.optim as optim
 
 loss_function = nn.MSELoss()
-# TODO: create a network with 20 hidden units  
+# TODO: create a network with 20 hidden units
+model = LSTMNetwork(2, 20, 2)
 # TODO: create a SGD optimizer with learning rate 0.05
+optimizer = optim.SGD(model.parameters(), lr=0.05)
 
 running_loss = 0
 for sample in range(2000):
@@ -146,22 +152,59 @@ for sample in range(2000):
 
     initial_conditions, trajectories = get_minibatch(20)
 
-    #TODO: run the model and calculate the loss (use the variable name "loss") 
+    # TODO: run the model and calculate the loss (use the variable name "loss")
+    output = model(initial_conditions)
+    loss = loss_function(output, trajectories)
 
     loss.backward()
 
-    # calculate and periodically loss that is smoothed over time 
-    running_loss = .9*running_loss + .1*loss.item()
+    # calculate and periodically loss that is smoothed over time
+    running_loss = 0.9 * running_loss + 0.1 * loss.item()
     if sample % 50 == 49:
-        print('Batch #{}  Loss {}'.format(sample+1, running_loss))
+        print("Batch #{}  Loss {}".format(sample + 1, running_loss))
     optimizer.step()
-
 ```
 
-    Batch #50  Loss 6.150180571931373
-    Batch #100  Loss 6.165512594408533
-    Batch #150  Loss 5.519745931591105
-    Batch #200  Loss 1.340008675010135
+    Batch #50  Loss 6.293894619468839
+    Batch #100  Loss 5.762611855022339
+    Batch #150  Loss 5.607113317814739
+    Batch #200  Loss 2.3420097685667516
+    Batch #250  Loss 1.2534920413306934
+    Batch #300  Loss 0.8336753160823862
+    Batch #350  Loss 0.7769279938696865
+    Batch #400  Loss 0.7237882620050807
+    Batch #450  Loss 0.6832269376685771
+    Batch #500  Loss 0.725966537364175
+    Batch #550  Loss 0.47483595047104904
+    Batch #600  Loss 0.6223627692584818
+    Batch #650  Loss 0.3997270333887592
+    Batch #700  Loss 0.32180463130200204
+    Batch #750  Loss 0.3239360410527562
+    Batch #800  Loss 0.24107008418974063
+    Batch #850  Loss 0.23968352670959264
+    Batch #900  Loss 0.2634254207515801
+    Batch #950  Loss 0.17501580027665933
+    Batch #1000  Loss 0.1622199606145322
+    Batch #1050  Loss 0.12326706487953226
+    Batch #1100  Loss 0.16297130347313601
+    Batch #1150  Loss 0.08770518288381517
+    Batch #1200  Loss 0.23472384380643646
+    Batch #1250  Loss 0.12090761013248283
+    Batch #1300  Loss 0.13117692250635274
+    Batch #1350  Loss 0.06994494357523305
+    Batch #1400  Loss 0.07052868440637165
+    Batch #1450  Loss 0.0793072449362561
+    Batch #1500  Loss 0.18685223076528876
+    Batch #1550  Loss 0.06677226973098338
+    Batch #1600  Loss 0.12203530464950134
+    Batch #1650  Loss 0.09267002840036553
+    Batch #1700  Loss 0.05339306498338389
+    Batch #1750  Loss 0.09557892110992139
+    Batch #1800  Loss 0.0535833119105982
+    Batch #1850  Loss 0.05348996724695178
+    Batch #1900  Loss 0.04669187606192814
+    Batch #1950  Loss 0.05335406964271947
+    Batch #2000  Loss 0.09850373027232559
 
 
 Finally we sould see how well the network does at pretending to be a van der Pol oscillator. Plot the flow field again along with trajectories from one minibatch. 
