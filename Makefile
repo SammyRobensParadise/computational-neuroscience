@@ -17,3 +17,4 @@ markdown:
 	jupyter nbconvert ./tutorials/mlp_tutorial.ipynb --to markdown --output mlp-tutorial.md
 	jupyter nbconvert ./tutorials/cnn_tutorial.ipynb --to markdown --output cnn-tutorial.md
 	jupyter nbconvert ./tutorials/convolution_tutorial.ipynb --to markdown --output convolution-tutorial.md
+		jupyter nbconvert ./tutorials/recurrent_network_tutorial.ipynb --to markdown --output recurrent-network-tutorial.md

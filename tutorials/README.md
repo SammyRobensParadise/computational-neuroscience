@@ -4,3 +4,4 @@
 - [MLP Tutorial](./mlp-tutorial.md)
 - [CNN Tutorial](./cnn-tutorial.md)
 - [Convolution Tutorial](./convolution-tutorial.md)
+- [Recurrent Network Tutorial](./recurrent-network-tutorial.md)
