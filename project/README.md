@@ -1,3 +1,13 @@
+# Reinforcement Learning Mouse Model of Maze Discovery
+
+SYDE 552
+
+
+Winter 2023
+
+
+April 21st 2023
+
 ### Importing neccesary libraries for data creation and visualization
 
 
@@ -429,7 +439,7 @@ show(qmaze)
 
 
     
-![png](README_files/README_7_1.png)
+![png](README_files/README_8_1.png)
     
 
 
