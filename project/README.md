@@ -158,11 +158,11 @@ class Qmaze(object):
         return envstate, reward, status
 
     def observe(self):
-        canvas = self.draw_env()
+        canvas = self.create_environment()
         envstate = canvas.reshape((1, -1))
         return envstate
 
-    def draw_env(self):
+    def create_environment(self):
         canvas = np.copy(self.maze)
         nrows, ncols = self.maze.shape
         # clear all visual marks
@@ -216,7 +216,7 @@ class Qmaze(object):
 
 
 # show 8x8 maze | WALL = BLACK | MOUSE = DARK GRAY | PATH = LIGHT GRAY | CHEESE = VERY LIGHT GRAY
-def show(qmaze):
+def show(qmaze: Qmaze):
     plt.grid("on")
     nrows, ncols = qmaze.maze.shape
     ax = plt.gca()
@@ -443,12 +443,12 @@ show(qmaze)
     
 
 
-# Create an Experiment
-Create an `Experiment` Class that accepts a trained neural network which calculates the next action, a Qmaze and the initial cell that the mouse is in.
+## Create a Trial
+Create an `Trial` class that accepts a trained neural network which calculates the next action, a Qmaze and the initial cell that the mouse is in.
 
 
 ```python
-class Experiment:
+class Trial:
     def __init__(self, model, qmaze: Qmaze, mouse_cell: list):
         self._qmaze = qmaze
         self._model = model
@@ -491,7 +491,47 @@ class Experiment:
         return self.mouse_cell
 ```
 
+## Creating a Class to Model the Experience of the Mouse
+Create an `Experience` class that collects the experience of `Experiments` within a `list` of memory. It retreives a `model`, a `max_memory` which defines the maximum amount of experiments that the mouse can _remember_ and a `discount` factor which represents the instantanious uncertainty in the _Bellman equation for stochastic environments_.
+
 
 ```python
-# SEE "THE QMAZE CLASS" and "play_game" cell and beyond from qmaze article "https://www.samyzaf.com/ML/rl/qmaze.html?fbclid=IwAR1GlQIP4X4nrlX81WyJXSBMhIt74-hr413iVZOditFMu0BVBp-5ABCJAW4" for how to implement model on qmaze simulation
+class Experience(object):
+    def __init__(self, model, max_memory: int = 100, discount: float = 95 / 100):
+        self.model = model
+        self.max_memory = max_memory
+        self.discount = discount
+        self.memory = list()
+        self.actions = model.output_shape[-1]
+
+    def remember(self, trial):
+        self.memory.append(trial)
+        if len(self.memory) > self.max_memory:
+            # delete the first element of the memory list if we exceed the max memory
+            del self.memory[0]
+
+    def predict(self, env_state):
+        return self.model.predict(env_state)[0]
+
+    def data(self, data_size: int = 10):
+        environment_size = self.memory[0][0].shape[1]
+        memory_size = len(self.memory)
+        data_size = min(memory_size, data_size)
+        inputs = np.zeros((data_size, environment_size))
+        targets = np.zeros((data_size, self.actions))
+        for idx, jdx in enumerate(
+            np.random.choice(range(memory_size), data_size, replace=False)
+        ):
+            envstate, action, reward, envstate_next, trial_over = self.memory[jdx]
+            inputs[idx] = envstate
+            # There should be no target values for actions not taken.
+            targets[idx] = self.predict(envstate)
+            # Q_sa = derived policy = max quality env/action = max_a' Q(s', a')
+            Q_sa = np.max(self.predict(envstate_next))
+            if trial_over:
+                targets[idx, action] = reward
+            else:
+                # reward + gamma * max_a' Q(s', a')
+                targets[idx, action] = reward + self.discount * Q_sa
+        return inputs, targets
 ```
