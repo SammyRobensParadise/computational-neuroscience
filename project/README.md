@@ -644,6 +644,8 @@ class Experiment(object):
                 print("reward")
                 print(reward)
                 print(env_state)
+                print("hsize")
+                print(hsize)
                 if status == "win":
                     completion_history.append(1)
                     trial_over = True
