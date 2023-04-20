@@ -9,12 +9,12 @@ Original file is located at
 
 # Commented out IPython magic to ensure Python compatibility.
 from __future__ import print_function
-import os, sys, time, datetime, json, random
+import datetime, json, random
 import numpy as np
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Dense
 from keras.optimizers import SGD, Adam, RMSprop
-from keras.layers import PReLU
+from keras.layers import PReLU, LeakyReLU
 import matplotlib.pyplot as plt
 from random import randint
 
@@ -395,7 +395,7 @@ maze = generate_random_maze()
 qmaze = Qmaze(maze)
 
 
-def run_trial(model, qmaze: Qmaze, mouse_cell):
+def run_trial(model: Sequential, qmaze: Qmaze, mouse_cell):
     """
     Runs a trial with a given mode, a maze, and the mouse's initial position
     """
@@ -434,11 +434,11 @@ class Experience(object):
      rather than the long term reward
     """
 
-    def __init__(self, model, max_memory=30, discount=0.95):
+    def __init__(self, model: Sequential, max_memory=30, discount=0.95):
         self.model = model
         self.max_memory = max_memory
         self.discount = discount
-        self.memory = list()
+        self.memory: np.ndarray = list()
         self.num_actions = model.output_shape[-1]
 
     def remember(self, trial):
@@ -595,12 +595,41 @@ def format_time(seconds):
         return "%.2f hours" % (h,)
 
 
-def mouse_brain(maze, lr=0.001):
+def mouse_brain(maze: np.ndarray, lr=0.001):
+    """
+    Mouse Brain Model
+    """
+    """
+    create a sequential model that we will add layers to
+    """
     model: Sequential = Sequential()
-    model.add(Dense(maze.size, input_shape=(maze.size,)))
+    """
+    Create a first layer that serves as the visual cortex,
+    receiving input based on what the mouse can see
+    """
+    model.add(Dense(maze.size, input_shape=(maze.size,), activation="relu"))
+
+    """
+    Dense set of Leaky ReLU neurons representing cortex
+    """
+    model.add(Dense(maze.size))
+    model.add(PReLU())
+
+    """
+    Bottle neck excite and inhibit neurons in BG
+    """
+    model.add(Dense(maze.size / 4))
     model.add(PReLU())
     model.add(Dense(maze.size))
     model.add(PReLU())
+
+    """
+    the final layer of the model is a dense later of neurons
+    whos output is the the dimension of the number of actions
+    when predicting, the output of the model is an action
+    this can be thought of as the motor cortex, which synapse directly
+    onto motor neurons
+    """
     model.add(Dense(num_actions))
     model.compile(optimizer="adam", loss="mse")
     return model
